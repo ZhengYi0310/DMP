@@ -1,0 +1,10 @@
+---
+name: ""
+dmp_execution_time: 2
+dmp_startPos: [0, 0]
+dmp_endPos: [10, 10]
+dmp_startVel: [0, 0]
+dmp_endVel: [0, 0]
+dmp_startAcc: [0, 0]
+dmp_endAcc: [0, 0]
+...

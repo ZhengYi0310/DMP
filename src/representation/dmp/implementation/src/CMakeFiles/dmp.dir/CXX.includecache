@@ -1,0 +1,32 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/yzheng/PycharmProjects/DMP/implementation/src/DMP.cpp
+DMP.h
+/home/yzheng/PycharmProjects/DMP/implementation/src/DMP.h
+eigen3/Eigen/Core
+-
+eigen3/Eigen/LU
+-
+eigen3/Eigen/StdVector
+-
+eigen3/Eigen/Geometry
+-
+vector
+-
+cassert
+-
+stdexcept
+-
+string
+-
+cmath
+-
+
+/home/yzheng/PycharmProjects/DMP/implementation/src/DMP.h
+

@@ -1,0 +1,1 @@
+/usr/bin/c++  -fPIC    -shared -Wl,-soname,libdmp_cpp.so -o libdmp_cpp.so CMakeFiles/dmp_cpp.dir/src/DMPConfig.cpp.o CMakeFiles/dmp_cpp.dir/src/DMPModel.cpp.o -lyaml-cpp 
