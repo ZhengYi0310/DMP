@@ -5,32 +5,32 @@ project(DMP)
 set(PROJECT_VERSION 1.0)
 set(PROJECT_DESCRIPTION "Dynamical Movement Primitives.")
 
+
+IF (WIN32)
+  SET (POSTLIB ".dll")
+  SET (PRELIB "lib")
+  SET (LIBPATH "bin")
+  SET (LIBRARY_PATH_VAR "LD_LIBRARY_PATH")
+ELSE (WIN32)
+  IF (APPLE)
+    SET (POSTLIB ".dylib")
+    SET (PRELIB "lib")
+    SET (LIBPATH "lib")
+    SET (LIBRARY_PATH_VAR "DYLD_LIBRARY_PATH")
+  ELSE (APPLE)
+    SET (POSTLIB ".so")
+    SET (PRELIB "lib")
+    SET (LIBPATH "lib")
+    SET (LIBRARY_PATH_VAR "LD_LIBRARY_PATH")
+  ENDIF (APPLE)
+ENDIF (WIN32)
+
+add_definitions ("-Wall")
+
+
+
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(YAMLCPP REQUIRED yaml-cpp)
+pkg_check_modules(EIGEN3 REQUIRED eigen3)
 
-include_directories(
-    ${EIGEN3_INCLUDE_DIRS}
-    ${YAMLCPP_INCLUDE_DIRS}
-    ${LIB_MANAGER_INCLUDE_DIRS}
-    include
-)
-
-link_directories(${YAMLCPP_LIBRARY_DIRS})
-add_definitions(${YAMLCPP_CFLAGS_OTHER})  #flags excluding the ones with -I
-
-
-set(sources src/DMPConfig.cpp
-            src/DMPModel.cpp)
-set(headers include/DMP/DMPConfig.h
-            include/DMP/DMPModel.h)
-
-add_library(dmp_cpp SHARED ${sources} ${headers})
-target_link_libraries(dmp_cpp ${YAMLCPP_LIBRARIES})
-#BUILD_DMP_BEHAVIOR_STANDALONE enables the behavior macros for the DmpBehavior
-set_target_properties(dmp_cpp PROPERTIES COMPILE_FLAGS "-DBUILD_DMP_BEHAVIOR_STANDALONE")
-
-install (TARGETS dmp_cpp DESTINATION lib)
-install (FILES ${headers} DESTINATION include/${PROJECT_NAME})
-
-enable_testing()
-add_subdirectory(test)
+add_subdirectory(implementation)

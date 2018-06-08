@@ -108,16 +108,6 @@ rebuild_cache:
 rebuild_cache/fast: rebuild_cache
 .PHONY : rebuild_cache/fast
 
-# Special rule for the target test
-test:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running tests..."
-	/usr/bin/ctest --force-new-ctest-process $(ARGS)
-.PHONY : test
-
-# Special rule for the target test
-test/fast: test
-.PHONY : test/fast
-
 # The main all target
 all: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yzheng/PycharmProjects/DMP/build/CMakeFiles /home/yzheng/PycharmProjects/DMP/build/CMakeFiles/progress.marks
@@ -150,78 +140,30 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named dmp_cpp
+# Target rules for targets named dmp
 
 # Build rule for target.
-dmp_cpp: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 dmp_cpp
-.PHONY : dmp_cpp
+dmp: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 dmp
+.PHONY : dmp
 
 # fast build rule for target.
-dmp_cpp/fast:
-	$(MAKE) -f CMakeFiles/dmp_cpp.dir/build.make CMakeFiles/dmp_cpp.dir/build
-.PHONY : dmp_cpp/fast
+dmp/fast:
+	$(MAKE) -f implementation/src/CMakeFiles/dmp.dir/build.make implementation/src/CMakeFiles/dmp.dir/build
+.PHONY : dmp/fast
 
 #=============================================================================
-# Target rules for targets named dmp_cpp_test
+# Target rules for targets named python_setup
 
 # Build rule for target.
-dmp_cpp_test: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 dmp_cpp_test
-.PHONY : dmp_cpp_test
+python_setup: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 python_setup
+.PHONY : python_setup
 
 # fast build rule for target.
-dmp_cpp_test/fast:
-	$(MAKE) -f test/CMakeFiles/dmp_cpp_test.dir/build.make test/CMakeFiles/dmp_cpp_test.dir/build
-.PHONY : dmp_cpp_test/fast
-
-src/DMPConfig.o: src/DMPConfig.cpp.o
-.PHONY : src/DMPConfig.o
-
-# target to build an object file
-src/DMPConfig.cpp.o:
-	$(MAKE) -f CMakeFiles/dmp_cpp.dir/build.make CMakeFiles/dmp_cpp.dir/src/DMPConfig.cpp.o
-.PHONY : src/DMPConfig.cpp.o
-
-src/DMPConfig.i: src/DMPConfig.cpp.i
-.PHONY : src/DMPConfig.i
-
-# target to preprocess a source file
-src/DMPConfig.cpp.i:
-	$(MAKE) -f CMakeFiles/dmp_cpp.dir/build.make CMakeFiles/dmp_cpp.dir/src/DMPConfig.cpp.i
-.PHONY : src/DMPConfig.cpp.i
-
-src/DMPConfig.s: src/DMPConfig.cpp.s
-.PHONY : src/DMPConfig.s
-
-# target to generate assembly for a file
-src/DMPConfig.cpp.s:
-	$(MAKE) -f CMakeFiles/dmp_cpp.dir/build.make CMakeFiles/dmp_cpp.dir/src/DMPConfig.cpp.s
-.PHONY : src/DMPConfig.cpp.s
-
-src/DMPModel.o: src/DMPModel.cpp.o
-.PHONY : src/DMPModel.o
-
-# target to build an object file
-src/DMPModel.cpp.o:
-	$(MAKE) -f CMakeFiles/dmp_cpp.dir/build.make CMakeFiles/dmp_cpp.dir/src/DMPModel.cpp.o
-.PHONY : src/DMPModel.cpp.o
-
-src/DMPModel.i: src/DMPModel.cpp.i
-.PHONY : src/DMPModel.i
-
-# target to preprocess a source file
-src/DMPModel.cpp.i:
-	$(MAKE) -f CMakeFiles/dmp_cpp.dir/build.make CMakeFiles/dmp_cpp.dir/src/DMPModel.cpp.i
-.PHONY : src/DMPModel.cpp.i
-
-src/DMPModel.s: src/DMPModel.cpp.s
-.PHONY : src/DMPModel.s
-
-# target to generate assembly for a file
-src/DMPModel.cpp.s:
-	$(MAKE) -f CMakeFiles/dmp_cpp.dir/build.make CMakeFiles/dmp_cpp.dir/src/DMPModel.cpp.s
-.PHONY : src/DMPModel.cpp.s
+python_setup/fast:
+	$(MAKE) -f implementation/dmp/CMakeFiles/python_setup.dir/build.make implementation/dmp/CMakeFiles/python_setup.dir/build
+.PHONY : python_setup/fast
 
 # Help Target
 help:
@@ -229,21 +171,14 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
-	@echo "... dmp_cpp"
 	@echo "... edit_cache"
 	@echo "... install"
 	@echo "... install/local"
 	@echo "... install/strip"
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
-	@echo "... test"
-	@echo "... dmp_cpp_test"
-	@echo "... src/DMPConfig.o"
-	@echo "... src/DMPConfig.i"
-	@echo "... src/DMPConfig.s"
-	@echo "... src/DMPModel.o"
-	@echo "... src/DMPModel.i"
-	@echo "... src/DMPModel.s"
+	@echo "... dmp"
+	@echo "... python_setup"
 .PHONY : help
 
 

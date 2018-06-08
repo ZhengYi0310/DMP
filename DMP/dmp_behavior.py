@@ -3,10 +3,12 @@ import warnings
 import StringIO
 import numpy as np
 from behavior import OptimizableBehavior
+import sys
+sys.path.append('/home/yzheng/PycharmProjects/DMP/implementation/dmp')
 import dmp
 
 
-DMP_META_PARAMETERS = ["x0", "g", "gd", "gdd", "execution_time"]
+DMP_META_PARAMETERS = ["y0", "g", "gd", "gdd", "execution_time"]
 
 def load_dmp_model(dmp, filename):
     """
@@ -26,9 +28,9 @@ def load_dmp_model(dmp, filename):
     dmp.execution_time = model["ts_tau"]
     dmp.dt = model["ts_dt"]
     dmp.n_features = dmp.widths.shape[0]
-    dmp.weights = np.array(model["ft_weights"], dtype=np.float).reshape(dmp.n_task_dims , dmp.n_features)
+    dmp.weights = np.array(model["ft_weights"], dtype=np.float).reshape(dmp.n_features, dmp.n_task_dims)
 
-    if dmp.execution_time != model(["cs_execution_time"]):
+    if dmp.execution_time != model["cs_execution_time"]:
         raise ValueError("Inconsistent execution times: {} != {}"
                          .format(model["ts_tau"], model["cs_execution_time"]))
 
@@ -70,7 +72,7 @@ class DMPBehavior(OptimizableBehavior):
 
     Parameters can be optimized using a black box optimizer
     """
-    def __init__(self, execution_time=1.0, dt=0.001, n_features=50, yaml_config=None):
+    def __init__(self, execution_time=1.0, dt=0.01, n_features=50, yaml_config=None):
         if yaml_config is None:
             self.execution_time = execution_time
             self.dt = dt
@@ -93,7 +95,7 @@ class DMPBehavior(OptimizableBehavior):
 
         else:
             self.name = "DMP"
-            self.alpha_x = dmp.computeAlphaX(0.01, self.execution_time, 0.0)
+            self.alpha_x = dmp.computeAlphaX(1e-5, self.execution_time, 0.0)
             self.widths = np.zeros(self.n_features)
             self.centers = np.zeros(self.n_features)
             dmp.initializeRBF(self.widths, self.centers, self.execution_time, 0.0, 0.8, self.alpha_x)
@@ -101,19 +103,23 @@ class DMPBehavior(OptimizableBehavior):
             self.beta_y = self.alpha_y / 4.0
             self.weights = np.zeros((self.n_features, self.n_task_dims))
 
+
         if not hasattr(self, "y0"):
-            self.y0 = None
+            self.y0 = np.zeros(self.n_task_dims)
         if not hasattr(self, "y0d"):
-            self.y0d = None
+            self.y0d = np.zeros(self.n_task_dims)
         if not hasattr(self, "y0dd"):
-            self.y0dd = None
+            self.y0dd = np.zeros(self.n_task_dims)
         if not hasattr(self, "g"):
-            self.g = None
+            self.g = np.zeros(self.n_task_dims)
         if not hasattr(self, "gd"):
-            self.gd = None
+            self.gd = np.zeros(self.n_task_dims)
         if not hasattr(self, "gdd"):
-            self.gdd = None
+            self.gdd = np.zeros(self.n_task_dims)
+
         self.reset()
+
+
 
     def set_meta_parameters(self, keys, meta_parameters):
         """
@@ -136,7 +142,7 @@ class DMPBehavior(OptimizableBehavior):
         :return:
         """
         self.last_y = inputs[:self.n_task_dims]
-        self.last_yd = inputs[self.n_task_dims + 1 : -self.n_task_dims]
+        self.last_yd = inputs[self.n_task_dims : -self.n_task_dims]
         self.last_ydd = inputs[-self.n_task_dims:]
 
     def get_outputs(self, outputs):
@@ -146,7 +152,7 @@ class DMPBehavior(OptimizableBehavior):
         :return:
         """
         outputs[:self.n_task_dims] = self.y[:]
-        outputs[self.n_task_dims + 1: -self.n_task_dims] = self.yd[:]
+        outputs[self.n_task_dims : -self.n_task_dims] = self.yd[:]
         outputs[-self.n_task_dims:] = self.ydd[:]
 
     def step(self):
@@ -157,27 +163,30 @@ class DMPBehavior(OptimizableBehavior):
         if self.n_task_dims == 0:
             raise  ValueError("Task dimensions are 0!")
 
-        dmp.dmpPropagate(self.last_t, self.t,
-                      self.last_y, self.last_yd, self.last_ydd,
-                      self.y,      self.yd,      self.ydd,
-                      self.g,      self.gd,      self.gdd,
-                      self.y0,     self.y0d,     self.y0dd,
-                      self.execution_time, 0.0,
-                      self.weights, self.widths, self.centers,
-                      self.alpha_y, self.beta_y, self.alpha_x,
-                      self.dt)
 
-        if self.t == self.last_t:
-            self.last_t = -1.0
-        else:
-            self.t += self.last_t
+
+
+        dmp.dmpPropagate(self.last_t, self.t,
+                         self.last_y, self.last_yd, self.last_ydd,
+                         self.y, self.yd, self.ydd,
+                         self.g, self.gd, self.gdd,
+                         self.y0, self.y0d, self.y0dd,
+                         self.execution_time, 0.0,
+                         self.weights, self.widths, self.centers,
+                         self.alpha_y, self.beta_y, self.alpha_x,
+                         self.dt)
+
+
+        self.last_t = self.t
+        self.t += self.dt
+
 
     def can_step(self):
         """
         check if step() can be called again.
         :return:
         """
-        return (self.t <= self.execution_time)
+        return (self.t <= self.execution_time + self.dt)
 
     def get_n_params(self):
         """
@@ -208,6 +217,8 @@ class DMPBehavior(OptimizableBehavior):
         self.last_yd = np.copy(self.y0d)
         self.last_ydd = np.copy(self.y0dd)
 
+
+
         self.y = np.zeros(self.n_task_dims)
         self.yd = np.zeros(self.n_task_dims)
         self.ydd = np.zeros(self.n_task_dims)
@@ -237,9 +248,9 @@ class DMPBehavior(OptimizableBehavior):
 
         Y = Y[:, :, 0].T.copy()
 
-        dmp.LearnfromDemo(np.arange(0, self.execution_time + self.dt, self.dt),
-                          regularization_coeff, self.weights, self.widths, self.centers,
-                          1e-10, self.alpha_y, self.beta_y, self.alpha_x,
+        dmp.LearnfromDemo(np.arange(0, self.execution_time + self.dt, self.dt), Y,
+                          self.weights, self.widths, self.centers,
+                          regularization_coeff, self.alpha_y, self.beta_y, self.alpha_x,
                           allow_final_velocity)
 
     def gen_traj(self):
@@ -264,24 +275,27 @@ class DMPBehavior(OptimizableBehavior):
             dmp.dmpPropagate(last_t, t,
                              last_y, last_yd, last_ydd,
                              y, yd, ydd,
+                             self.g, self.gd, self.gdd,
                              self.y0, self.y0d, self.y0dd,
                              self.execution_time, 0.0,
                              self.weights, self.widths, self.centers,
                              self.alpha_y, self.beta_y, self.alpha_x,
                              self.dt)
             last_t = t
-            last_y[:, :] = y
-            last_yd[:, :] = yd
-            last_ydd[:, :] = ydd
+            last_y[:] = y
+            last_yd[:] = yd
+            last_ydd[:] = ydd
 
             Y.append(y.copy())
             Yd.append(yd.copy())
             Ydd.append(ydd.copy())
 
-        return np.array(Y), np.array(Yd), np.array(Ydd)
+        return [np.array(Y), np.array(Yd), np.array(Ydd)]
+
+    def save(self, filename):
+        save_dmp_model(self, filename)
 
     def save_config(self, filename):
-        config = {}
         config = {}
         config["name"] = self.name
         config["dmp_execution_time"] = self.execution_time
@@ -297,7 +311,7 @@ class DMPBehavior(OptimizableBehavior):
         with open(filename, "w") as f:
             f.write("---\n")
             f.write(config_content.getvalue())
-            f.write("---\n")
+            f.write("...\n")
         config_content.close()
 
     def load_config(self, filename):

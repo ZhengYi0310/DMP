@@ -38,7 +38,7 @@ class Base(object):
 
     def __repr__(self):
         param_dict = self.get_args()
-        params = ",".join(["{}={}".format(key, value) for key, value in self.get_args().iteritems()])
+        params = ",".join(["{}={}".format(key, value) for key, value in param_dict.iteritems()])
         return "{}({})".format(self.__class__.__name__, params)
 
 class Behavior(Base):
@@ -55,6 +55,7 @@ class Behavior(Base):
         :param n_outputs: number of outputs
         :return:
         """
+        raise NotImplementedError
 
     @abstractmethod
     def set_meta_parameters(self, keys, meta_parameters):
@@ -64,6 +65,7 @@ class Behavior(Base):
         :param meta_parameters: a list of double, values of the metaparameters
         :return:
         """
+        raise NotImplementedError
 
     @abstractmethod
     def set_inputs(self, inputs):
@@ -76,6 +78,7 @@ class Behavior(Base):
         :param inputs: array, (n_inputs, )
         :return:
         """
+        raise NotImplementedError
 
     @abstractmethod
     def get_outputs(self, outputs):
@@ -88,12 +91,14 @@ class Behavior(Base):
         :param outputs: array, (n_outputs, )
         :return:
         """
+        raise NotImplementedError
 
     @abstractmethod
     def step(self):
         """Compute output for the received input.
                Uses the inputs and meta-parameters to compute the outputs.
         """
+        raise NotImplementedError
 
     def can_step(self):
         """Returns if step() can be called again.
@@ -116,6 +121,7 @@ class BehaviorTemplate(Base):
         context : array-like, shape (n_context_dims,)
             Current context
         """
+        raise NotImplementedError
 
 class OptimizableBehavior(Behavior):
     """Can be optimized with black box optimizer.
@@ -138,7 +144,7 @@ class OptimizableBehavior(Behavior):
                 n_params : int
                     Number of parameters that will be optimized.
         """
-
+        raise NotImplementedError
     @abstractmethod
     def get_params(self):
         """Get current parameters.
@@ -147,6 +153,7 @@ class OptimizableBehavior(Behavior):
         params : array-like, shape = (n_params,)
             Current parameters.
         """
+        raise NotImplementedError
 
     @abstractmethod
     def set_params(self, params):
@@ -156,6 +163,7 @@ class OptimizableBehavior(Behavior):
                 params : array-like, shape = (n_params,)
                     New parameters.
         """
+        raise NotImplementedError
 
     @abstractmethod
     def reset(self):
