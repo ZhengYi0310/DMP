@@ -1,1 +1,0 @@
-/usr/bin/c++       CMakeFiles/dmp_cpp_test.dir/test_dmp_config.cpp.o CMakeFiles/dmp_cpp_test.dir/test_dmp_model.cpp.o CMakeFiles/dmp_cpp_test.dir/test_main.cpp.o  -o dmp_cpp_test -rdynamic ../libdmp_cpp.so -lyaml-cpp -Wl,-rpath,/home/yzheng/PycharmProjects/DMP/build 

@@ -1,2 +1,0 @@
-/home/yzheng/PycharmProjects/DMP/src/representation/dmp/implementation/build/src/CMakeFiles/dmp.dir
-/home/yzheng/PycharmProjects/DMP/src/representation/dmp/implementation/build/dmp/CMakeFiles/python_setup.dir
