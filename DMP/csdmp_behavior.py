@@ -4,15 +4,17 @@ import StringIO
 import numpy as np
 from behavior import OptimizableBehavior
 from dmp_behavior import save_dmp_model, load_dmp_model
+import sys
+sys.path.append('/home/yzheng/PycharmProjects/DMP/implementation/dmp')
 import dmp
 
-CSDMP_META_PARAMETERS = ["x0", "g", "gd", "gdd", "q0", "qg", "execution_time"]
+CSDMP_META_PARAMETERS = ["y0", "g", "gd", "gdd", "q0", "qg", "execution_time"]
 
 class CartesianSpaceDMPBehavior(OptimizableBehavior):
     """
     Cartesian space dynamic movement primitive, with quaternion as rotation representation
     """
-    def __init__(self, execution_time=0.0, dt=0.001, n_features=50, yaml_config=None):
+    def __init__(self, execution_time=1.0, dt=0.001, n_features=50, yaml_config=None):
         if yaml_config is None:
             self.execution_time = execution_time
             self.dt = dt
@@ -36,7 +38,7 @@ class CartesianSpaceDMPBehavior(OptimizableBehavior):
 
         else:
             self.name = "Cartesian DMP"
-            self.alpha_x = dmp.computeAlphaX(0.01, self.execution_time, 0.0)
+            self.alpha_x = dmp.computeAlphaX(1e-5, self.execution_time, 0.0)
             self.widths = np.zeros(self.n_features)
             self.centers = np.zeros(self.n_features)
             dmp.initializeRBF(self.widths, self.centers, self.execution_time, 0.0, 0.8, self.alpha_x)
@@ -48,30 +50,30 @@ class CartesianSpaceDMPBehavior(OptimizableBehavior):
             self.weights = np.zeros((self.n_features, self.n_task_dims))
 
         if not hasattr(self, "y0"):
-            self.y0 = None
+            self.y0 = np.zeros(3)
         if not hasattr(self, "y0d"):
-            self.y0d = None
+            self.y0d = np.zeros(3)
         if not hasattr(self, "y0dd"):
-            self.y0dd = None
+            self.y0dd = np.zeros(3)
         if not hasattr(self, "g"):
-            self.g = None
+            self.g = np.zeros(3)
         if not hasattr(self, "gd"):
-            self.gd = None
+            self.gd = np.zeros(3)
         if not hasattr(self, "gdd"):
-            self.gdd = None
+            self.gdd = np.zeros(3)
 
         if not hasattr(self, "q0"):
             self.q0 = np.array([0.0, 1.0, 0.0, 0.0])
         if not hasattr(self, "q0d"):
-            self.q0d = None
+            self.q0d = np.zeros(3)
         if not hasattr(self, "q0dd"):
-            self.q0dd = None
+            self.q0dd = np.zeros(3)
         if not hasattr(self, "qg"):
             self.qg = np.array([0.0, 1.0, 0.0, 0.0])
         if not hasattr(self, "qgd"):
-            self.qgd = None
+            self.qgd = np.zeros(3)
         if not hasattr(self, "qgdd"):
-            self.qgdd = None
+            self.qgdd = np.zeros(3)
 
         self.reset()
 
@@ -80,10 +82,8 @@ class CartesianSpaceDMPBehavior(OptimizableBehavior):
         Reset DMP
         :return:
         """
-        if self.y0 is None:
-            self.last_y = np.zeros(self.n_task_dims)
-        else:
-            self.last_y = np.copy(self.y0)
+
+        self.last_y = np.copy(self.y0)
         self.last_yd = np.copy(self.y0d)
         self.last_ydd = np.copy(self.y0dd)
 
@@ -110,10 +110,11 @@ class CartesianSpaceDMPBehavior(OptimizableBehavior):
         if not hasattr(self, "position_weights"):
             self.position_weights = np.zeros((self.n_features, 3))
         if not hasattr(self, "orientation_weights"):
-            self.orientation_weights = np.zeros(())
+            self.orientation_weights = np.zeros((self.n_features, 3))
 
         self.position_weights[:] = weights[:, :3]
         self.orientation_weights[:] = weights[:, 3:]
+
     weights = property(get_weights, set_weights)
 
     def set_meta_parameters(self, keys, meta_parameters):
@@ -131,20 +132,16 @@ class CartesianSpaceDMPBehavior(OptimizableBehavior):
             setattr(self, key, meta_parameter)
 
     def set_inputs(self, inputs):
-        self.last_y   = inputs['y']
-        self.last_r   = inputs['r']
-        self.last_yd  = inputs['yd']
-        self.last_rd  = inputs['rd']
-        self.last_rdd = inputs['rdd']
-        self.last_ydd = inputs['ydd']
+        self.last_y   = inputs[:3]
+        self.last_r   = inputs[3:]
+        self.last_yd  = self.yd
+        self.last_rd  = self.rd
+        self.last_rdd = self.rdd
+        self.last_ydd = self.ydd
 
     def get_outputs(self, outputs):
-        outputs['y']   = self.y
-        outputs['r']   = self.r
-        outputs['yd']  = self.yd
-        outputs['rd']  = self.rd
-        outputs['ydd'] = self.ydd
-        outputs['rdd'] = self.rdd
+        outputs[:3]   = self.y
+        outputs[3:]   = self.r
 
 
 
@@ -166,7 +163,7 @@ class CartesianSpaceDMPBehavior(OptimizableBehavior):
                       self.alpha_y, self.beta_y, self.alpha_x,
                       self.dt)
 
-        dmp.dmpPropagate(self.last_t, self.t,
+        dmp.dmpPropagateQuaternion(self.last_t, self.t,
                          self.last_r, self.last_rd, self.last_rdd,
                          self.r, self.rd, self.rdd,
                          self.qg, self.qgd, self.qgdd,
@@ -176,13 +173,11 @@ class CartesianSpaceDMPBehavior(OptimizableBehavior):
                          self.alpha_y, self.beta_y, self.alpha_x,
                          self.dt)
 
-        if self.t == self.last_t:
-            self.last_t = -1.0
-        else:
-            self.t += self.last_t
+        self.last_t = self.t
+        self.t += self.dt
 
     def can_step(self):
-        return self.t <= self.execution_time
+        return self.t <= self.execution_time + self.dt
 
     def get_n_params(self):
         """
@@ -204,36 +199,44 @@ class CartesianSpaceDMPBehavior(OptimizableBehavior):
     def LearnfromDemo(self, Y, Yd= None, Ydd=None, regularization_coeff=1e-10, allow_final_velocity = False):
         """
 
-        :param Y: array, shape (7, n_steps, n_demos) : x, y, z, w, rx, ry, rz
+        :param Y: array, shape (n_steps, 7, n_demos) : x, y, z, w, rx, ry, rz
                   The demonstrated trajectories to be imitated.
-        :param Yd: array, shape (n_task_dims, n_steps, n_demos), optional
+        :param Yd: array, shape (n_steps, 7, n_demos), optional
                    Velocities of the demonstrated trajectories.
-        :param Ydd: array, shape (n_task_dims, n_steps, n_demos), optional
+        :param Ydd: array, shape (n_steps, 7, n_demos), optional
                     Velocities of the demonstrated trajectories.
         :param regularization_coeff: Regularization coefficient for the ridge regression
         :param allow_final_velocity:
         :return:
         """
-        if Y.shape[2] > 1:
-            warnings.warn("Imitations only accepts one demonstration!")
-        if Yd is not None:
-            warnings.warn("Xd is deprecated")
-        if Ydd is not None:
-            warnings.warn("Xdd is deprecated")
+        # if Y.shape[2] > 1:
+        #     warnings.warn("Imitations only accepts one demonstration!")
+        # if Yd is not None:
+        #     warnings.warn("Xd is deprecated")
+        # if Ydd is not None:
+        #     warnings.warn("Xdd is deprecated")
+        #
+        # Y = Y[:, :, 0].T.copy()
 
-        Y = Y[:, :, 0].T.copy()
+        Y_pos = Y[:, :3].copy()
+        Y_ori = Y[:, 3:].copy()
 
-        Y_pos = Y[:, :3]
-        Y_ori = Y[:, 3:]
-        dmp.LearnfromDemo(np.arange(0, self.execution_time + self.dt, self.dt),
-                          Y_pos, self.position_weights, self.widths, self.centers,
+
+
+        dmp.LearnfromDemo(np.arange(0, self.execution_time + self.dt, self.dt), Y_pos,
+                          self.position_weights, self.widths, self.centers,
                           regularization_coeff, self.alpha_y, self.beta_y, self.alpha_x,
                           allow_final_velocity)
 
+
+        print Y_pos[0:50, :]
+        # print self.position_weights
         dmp.LearnfromDemoQuaternion(np.arange(0, self.execution_time + self.dt, self.dt),
                                     Y_ori, self.orientation_weights, self.widths, self.centers,
                                     regularization_coeff, self.alpha_y, self.beta_y, self.alpha_x,
                                     allow_final_velocity)
+
+        # print self.orientation_weights
 
     def gen_traj(self):
         """
@@ -249,9 +252,9 @@ class CartesianSpaceDMPBehavior(OptimizableBehavior):
         last_rd = np.copy(self.q0d)
         last_rdd = np.copy(self.q0dd)
 
-        y = np.zeros(self.n_task_dims)
-        yd = np.zeros(self.n_task_dims)
-        ydd = np.zeros(self.n_task_dims)
+        y = np.zeros(3)
+        yd = np.zeros(3)
+        ydd = np.zeros(3)
 
         r = np.zeros(4)
         rd = np.zeros(3)
@@ -284,28 +287,30 @@ class CartesianSpaceDMPBehavior(OptimizableBehavior):
                                        self.execution_time, 0.0,
                                        self.orientation_weights, self.widths, self.centers,
                                        self.alpha_y, self.beta_y, self.alpha_x,
-                                       0.001)
+                                       self.dt)
 
             last_t = t
 
-            last_r[:, :] = r
-            last_rd[:, :] = rd
-            last_rdd[:, :] = rdd
-            last_y[:, :] = y
-            last_yd[:, :] = yd
-            last_ydd[:, :] = ydd
+            last_r[:] = r
+            last_rd[:] = rd
+            last_rdd[:] = rdd
+            last_y[:] = y
+            last_yd[:] = yd
+            last_ydd[:] = ydd
 
             Y.append(y.copy())
             Yd.append(yd.copy())
             Ydd.append(ydd.copy())
-            R.append(y.copy())
-            Rd.append(yd.copy())
-            Rdd.append(ydd.copy())
+            R.append(r.copy())
+            Rd.append(rd.copy())
+            Rdd.append(rdd.copy())
         return np.array(Y), np.array(Yd), np.array(Ydd), \
                np.array(R), np.array(Rd), np.array(Rdd)
 
+    save = save_dmp_model
+
+
     def save_config(self, filename):
-        config = {}
         config = {}
         config["name"] = self.name
         config["dmp_execution_time"] = self.execution_time
@@ -327,13 +332,13 @@ class CartesianSpaceDMPBehavior(OptimizableBehavior):
         with open(filename, "w") as f:
             f.write("---\n")
             f.write(config_content.getvalue())
-            f.write("---\n")
+            f.write("...\n")
         config_content.close()
 
     def load_config(self, filename):
         config = yaml.load(open(filename, "r"))
 
-        self.execution_time = config["dmp_execution_time"] =
+        self.execution_time = config["dmp_execution_time"]
         self.y0 = np.array(config["dmp_startPosition"], dtype=np.float)
         self.y0d = np.array(config["dmp_startVelocity"], dtype=np.float)
         self.y0dd = np.array(config["dmp_startAcceleration"], dtype=np.float)

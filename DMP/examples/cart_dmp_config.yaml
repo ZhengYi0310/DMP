@@ -1,0 +1,12 @@
+
+dmp_endAcceleration: [0.0, 0.0, 0.0]
+dmp_endPosition: [0.4363735, -0.06956600000000002, 0.9428189999999999]
+dmp_endOrientation: [1.0, 0.0, 0.0, 0.0]
+dmp_endVelocity: [0.0, 0.0, 0.0]
+dmp_execution_time: 5.995
+name: PythonCSDMP
+dmp_startAcceleration: [0.0, 0.0, 0.0]
+dmp_startAngularVelocity: [0.0, 0.0, 0.0]
+dmp_startPosition: [0.5, 0.1, 0.7]
+dmp_startOrientation: [1.0, 0.0, 0.0, 0.0]
+dmp_startVelocity: [0.0, 0.0, 0.0]

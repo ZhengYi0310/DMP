@@ -28,6 +28,7 @@ def load_dmp_model(dmp, filename):
     dmp.execution_time = model["ts_tau"]
     dmp.dt = model["ts_dt"]
     dmp.n_features = dmp.widths.shape[0]
+    #print np.array(model["ft_weights"], dtype=np.float).shape
     dmp.weights = np.array(model["ft_weights"], dtype=np.float).reshape(dmp.n_features, dmp.n_task_dims)
 
     if dmp.execution_time != model["cs_execution_time"]:
@@ -72,7 +73,7 @@ class DMPBehavior(OptimizableBehavior):
 
     Parameters can be optimized using a black box optimizer
     """
-    def __init__(self, execution_time=1.0, dt=0.01, n_features=50, yaml_config=None):
+    def __init__(self, execution_time=1.0, dt=0.001, n_features=50, yaml_config=None):
         if yaml_config is None:
             self.execution_time = execution_time
             self.dt = dt
@@ -229,11 +230,11 @@ class DMPBehavior(OptimizableBehavior):
     def LearnfromDemo(self, Y, Yd= None, Ydd=None, regularization_coeff=1e-10, allow_final_velocity = False):
         """
 
-        :param Y: array, shape (n_task_dims, n_steps, n_demos)
+        :param Y: array, shape (n_steps, n_task_dims, n_demos)
                   The demonstrated trajectories to be imitated.
-        :param Yd: array, shape (n_task_dims, n_steps, n_demos), optional
+        :param Yd: array, shape (n_steps,n_task_dims,  n_demos), optional
                    Velocities of the demonstrated trajectories.
-        :param Ydd: array, shape (n_task_dims, n_steps, n_demos), optional
+        :param Ydd: array, shape (n_steps, n_task_dims, n_demos), optional
                     Velocities of the demonstrated trajectories.
         :param regularization_coeff: Regularization coefficient for the ridge regression
         :param allow_final_velocity:
@@ -248,10 +249,18 @@ class DMPBehavior(OptimizableBehavior):
 
         Y = Y[:, :, 0].T.copy()
 
+
+
+
         dmp.LearnfromDemo(np.arange(0, self.execution_time + self.dt, self.dt), Y,
                           self.weights, self.widths, self.centers,
                           regularization_coeff, self.alpha_y, self.beta_y, self.alpha_x,
                           allow_final_velocity)
+        #print self.widths
+        # print self.weights
+        print Y[0:50, :]
+
+
 
     def gen_traj(self):
         """

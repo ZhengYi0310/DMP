@@ -549,6 +549,9 @@ namespace DMP
 
         // construct the PHI design matrix.
         const Eigen::MatrixXd PHI = rbfDesignMatrix(T_array, alpha_x, widths_array, centers_array);
+        //Eigen::IOFormat HeavyFmt(Eigen::FullPrecision, 0, ", ", ";\n", "[", "]", "[", "]");
+        //Eigen::IOFormat OctaveFmt(Eigen::StreamPrecision, 0, ", ", ";\n", "", "", "[", "]");
+        //std::cout << Y_array.format(OctaveFmt) << std::endl;
 
         Eigen::Map<Eigen::ArrayXXd> weights_array(weights, num_task_dims, num_weights_per_dim);
         L2Regression(PHI, F, regularization_coefficient, weights_array);

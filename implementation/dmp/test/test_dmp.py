@@ -270,15 +270,15 @@ def test_learn_from_demo():
     # assert_less(np.mean(distances), 0.02)
 
     # Four axes, returned as a 2-d array
-    f, axarr = plt.subplots(2, 2)
+    f, axarr = plt.subplots(4, 2)
     axarr[0, 0].plot(T, Y_replay[:, 0])
     axarr[0, 1].plot(T, Yd_replay[:, 0])
-    # axarr[1, 0].plot(T, Y_replay[:, 1])
-    # axarr[1, 1].plot(T, Yd_replay[:, 1])
-    # axarr[2, 0].plot(T, Y_replay[:, 2])
-    # axarr[2, 1].plot(T, Yd_replay[:, 2])
-    # axarr[3, 0].plot(T, Y_replay[:, 3])
-    # axarr[3, 1].plot(T, Yd_replay[:, 3])
+    axarr[1, 0].plot(T, Y_replay[:, 1])
+    axarr[1, 1].plot(T, Yd_replay[:, 1])
+    axarr[2, 0].plot(T, Y_replay[:, 2])
+    axarr[2, 1].plot(T, Yd_replay[:, 2])
+    axarr[3, 0].plot(T, Y_replay[:, 3])
+    axarr[3, 1].plot(T, Yd_replay[:, 3])
     plt.show()
     assert(None != None )
 
@@ -483,85 +483,85 @@ def test_learn_from_demo():
 #     plt.show()
 
 
-# def test_imitate_quaternion():
-#     T = np.linspace(0, 2, 201)
-#     n_features = 20
-#     widths = np.empty(n_features)
-#     centers = np.empty(n_features)
-#     dmp.initializeRBF(widths, centers, T[-1], T[0], 0.8, 25 / 3.0)
-#     R = np.zeros((T.shape[0], 4))
-#     for i in range(0, T.shape[0]):
-#                 angle = T[i] * np.pi
-#                 R[i] = np.array([np.cos(angle  / 2.01),
-#                      np.sqrt(0.5) * np.sin(angle / 2.01),
-#                      0.5 * np.sin(angle / 2.01),
-#                      0.5 * np.sin(angle / 2.01)])
-#
-#     weights = np.zeros((n_features, 3))
-#     alpha = 25.0
-#
-#     dmp.LearnfromDemoQuaternion(T, R, weights, widths, centers, 1e-10, alpha, alpha / 4.0, alpha / 3.0, False)
-#
-#     last_t = T[0]
-#     last_y = R[0].copy()
-#     last_yd = np.zeros(3)
-#     last_ydd = np.zeros(3)
-#
-#     y0 = R[0].copy()
-#     y0d = np.zeros(3)
-#     y0dd = np.zeros(3)
-#
-#     y = np.empty(4)
-#     yd = np.empty(3)
-#     ydd = np.empty(3)
-#
-#     g = R[-1].copy()
-#     gd = np.zeros(3)
-#     gdd = np.zeros(3)
-#
-#     R_replay = []
-#
-#     for t in np.linspace(T[0], T[-1], T.shape[0]):
-#         dmp.dmpPropagateQuaternion(last_t, t,
-#                                last_y, last_yd, last_ydd,
-#                                y, yd, ydd,
-#                                g, gd, gdd,
-#                                y0, y0d, y0dd,
-#                                T[-1], T[0],
-#                                weights,
-#                                widths,
-#                                centers,
-#                                alpha, alpha / 4.0, alpha / 3.0,
-#                                0.001)
-#
-#         last_t = t
-#         last_y[:] = y
-#         last_yd[:] = yd
-#         last_ydd[:] = ydd
-#
-#         R_replay.append(y.copy())
-#
-#     R_replay = np.array(R_replay)
-#
-#     distances = np.array([np.linalg.norm(y - y_replay)
-#                       for y, y_replay in zip(R, R_replay)])
-#     # assert_less(distances.max(), 0.032)
-#     # assert_less(distances.min(), 1e-10)
-#     # assert_less(sorted(distances)[len(distances) // 2], 0.02)
-#     # assert_less(np.mean(distances), 0.02)
-#
-#     # Four axes, returned as a 2-d array
-#     f, axarr = plt.subplots(4, 2)
-#     axarr[0, 0].plot(T, R_replay[:, 0])
-#     axarr[0, 1].plot(T, R[:, 0])
-#     axarr[1, 0].plot(T, R_replay[:, 1])
-#     axarr[1, 1].plot(T, R[:, 1])
-#     axarr[2, 0].plot(T, R_replay[:, 2])
-#     axarr[2, 1].plot(T, R[:, 2])
-#     axarr[3, 0].plot(T, R_replay[:, 3])
-#     axarr[3, 1].plot(T, R[:, 3])
-#     plt.show()
-#
+def test_imitate_quaternion():
+    T = np.linspace(0, 2, 201)
+    n_features = 20
+    widths = np.empty(n_features)
+    centers = np.empty(n_features)
+    dmp.initializeRBF(widths, centers, T[-1], T[0], 0.8, 25 / 3.0)
+    R = np.zeros((T.shape[0], 4))
+    for i in range(0, T.shape[0]):
+                angle = T[i] * np.pi
+                R[i] = np.array([np.cos(angle  / 2.01),
+                     np.sqrt(0.5) * np.sin(angle / 2.01),
+                     0.5 * np.sin(angle / 2.01),
+                     0.5 * np.sin(angle / 2.01)])
+
+    weights = np.zeros((n_features, 3))
+    alpha = 25.0
+
+    dmp.LearnfromDemoQuaternion(T, R, weights, widths, centers, 1e-10, alpha, alpha / 4.0, alpha / 3.0, False)
+
+    last_t = T[0]
+    last_y = R[0].copy()
+    last_yd = np.zeros(3)
+    last_ydd = np.zeros(3)
+
+    y0 = R[0].copy()
+    y0d = np.zeros(3)
+    y0dd = np.zeros(3)
+
+    y = np.empty(4)
+    yd = np.empty(3)
+    ydd = np.empty(3)
+
+    g = R[-1].copy()
+    gd = np.zeros(3)
+    gdd = np.zeros(3)
+
+    R_replay = []
+
+    for t in np.linspace(T[0], T[-1], T.shape[0]):
+        dmp.dmpPropagateQuaternion(last_t, t,
+                               last_y, last_yd, last_ydd,
+                               y, yd, ydd,
+                               g, gd, gdd,
+                               y0, y0d, y0dd,
+                               T[-1], T[0],
+                               weights,
+                               widths,
+                               centers,
+                               alpha, alpha / 4.0, alpha / 3.0,
+                               0.001)
+
+        last_t = t
+        last_y[:] = y
+        last_yd[:] = yd
+        last_ydd[:] = ydd
+
+        R_replay.append(y.copy())
+
+    R_replay = np.array(R_replay)
+
+    distances = np.array([np.linalg.norm(y - y_replay)
+                      for y, y_replay in zip(R, R_replay)])
+    # assert_less(distances.max(), 0.032)
+    # assert_less(distances.min(), 1e-10)
+    # assert_less(sorted(distances)[len(distances) // 2], 0.02)
+    # assert_less(np.mean(distances), 0.02)
+
+    # Four axes, returned as a 2-d array
+    f, axarr = plt.subplots(4, 2)
+    axarr[0, 0].plot(T, R_replay[:, 0])
+    axarr[0, 1].plot(T, R[:, 0])
+    axarr[1, 0].plot(T, R_replay[:, 1])
+    axarr[1, 1].plot(T, R[:, 1])
+    axarr[2, 0].plot(T, R_replay[:, 2])
+    axarr[2, 1].plot(T, R[:, 2])
+    axarr[3, 0].plot(T, R_replay[:, 3])
+    axarr[3, 1].plot(T, R[:, 3])
+    plt.show()
+
 
 
 

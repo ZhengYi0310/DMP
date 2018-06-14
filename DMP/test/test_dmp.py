@@ -303,39 +303,44 @@ def test_dmp_change_execution_time():
 
 
 
-# def test_dmp_Learn_From_Demo_2d():
-#     x0, g, execution_time, dt = np.zeros(2), np.array([-1, 2], dtype=np.double), 1.0, 0.001
-#
-#     beh = DMPBehavior(execution_time, dt, 20)
-#     beh.init(6, 6)
-#     beh.set_meta_parameters(["y0", "g"], [x0, g])
-#
-#     X_demo = make_minimum_jerk(x0, g, execution_time, dt)[0]
-#
-#     # Without regularization
-#     beh.LearnfromDemo(X_demo)
-#     X = beh.gen_traj()[0]
-#     #assert_array_almost_equal(X_demo.T[0], X, decimal=2)
-#
-#     # With alpha > 0
-#     beh.LearnfromDemo(X_demo, regularization_coeff=1.0)
-#     X = beh.gen_traj()[0]
-#     #assert_array_almost_equal(X_demo.T[0], X, decimal=3)
-#
-#     # Self-imitation
-#     beh.LearnfromDemo(X.T[:, :, np.newaxis])
-#     X2 = beh.gen_traj()[0]
-#
-#
-#     print X.shape
-#     print X2. shape
-#     f, axarr = plt.subplots(2, 2)
-#     axarr[0, 0].plot(np.linspace(0, execution_time + 0.01, 1001),X[:,0])
-#     axarr[0, 1].plot(np.linspace(0, execution_time + 0.01, 1001),X2[:, 0])
-#     axarr[1, 0].plot(np.linspace(0, execution_time + 0.01, 1001), X[:, 1])
-#     axarr[1, 1].plot(np.linspace(0, execution_time + 0.01, 1001), X2[:, 1])
-#     plt.show()
-#     assert_array_almost_equal(X2, X, decimal=3)
+def test_dmp_Learn_From_Demo_2d():
+    x0, g, execution_time, dt = np.zeros(3), np.ones(3), 1.0, 0.001
+
+    beh = DMPBehavior(execution_time, dt, 20)
+    beh.init(9, 9)
+    beh.set_meta_parameters(["y0", "g"], [x0, g])
+
+    X_demo = make_minimum_jerk(x0, g, execution_time, dt)[0]
+
+    # Without regularization
+    beh.LearnfromDemo(X_demo)
+    X = beh.gen_traj()[0]
+    #assert_array_almost_equal(X_demo.T[0], X, decimal=2)
+
+    # With alpha > 0
+    beh.LearnfromDemo(X_demo, regularization_coeff=1.0)
+    X = beh.gen_traj()[0]
+    #assert_array_almost_equal(X_demo.T[0], X, decimal=3)
+
+    # Self-imitation
+    beh.LearnfromDemo(X.T[:, :, np.newaxis])
+    X2 = beh.gen_traj()[0]
+
+    beh.LearnfromDemo(X_demo)
+    X = beh.gen_traj()[0]
+
+
+    print X.shape
+    print X2. shape
+    f, axarr = plt.subplots(3, 2)
+    axarr[0, 0].plot(np.linspace(0, execution_time + 0.01, 1001),X[:,0])
+    axarr[0, 1].plot(np.linspace(0, execution_time + 0.01, 1001),X2[:, 0])
+    axarr[1, 0].plot(np.linspace(0, execution_time + 0.01, 1001), X[:, 1])
+    axarr[1, 1].plot(np.linspace(0, execution_time + 0.01, 1001), X2[:, 1])
+    axarr[2, 0].plot(np.linspace(0, execution_time + 0.01, 1001), X[:, 2])
+    axarr[2, 1].plot(np.linspace(0, execution_time + 0.01, 1001), X2[:, 2])
+    plt.show()
+    assert_array_almost_equal(X2, X, decimal=3)
 
 
 def test_dmp_save_and_load():
